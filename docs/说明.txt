@@ -1,0 +1,195 @@
+AM2R 简体中文语言包（Linux / Flatpak / Steam Deck 版）
+版本: v1.0.0    ·    生成日期: 2026-10-14
+仓库: https://github.com/PomiHD/am2r-schinese-langpack   （语言包、脚本、构建脚本的源文件都在这里）
+许可: 脚本 MIT ｜ 字体 SIL OFL 1.1（Fusion Pixel Font）｜ 翻译文本版权归译者
+声明: 非官方粉丝作品，不含任何游戏本体文件；不向上游社区提交任何 PR / issue（见文末「来源与许可」）
+
+【这是什么】
+把 AM2R 的社区汉化（简体中文）做成可以直接注入 Linux 版 AM2R 的 lang/ 语言包。
+
+官方 AM2RLauncher 分发的 Community Updates 里只有 13 种语言（英法德西捷日意俄葡葡巴乌瑞典），
+不含中文。中文翻译由 Hambaka 等人在 AM2R-Localizations 仓库的 PR #16 提供，但因为字体问题
+（字号太小、汉字沿用日文字形、需要母语校对）一直没有合并，也没随官方包分发。
+本语言包 = PR #16 的翻译文本 + 官方仓库的简体中文标题图 + 专为中文重做的像素字体（5 个 TTF 子集）。
+装好后游戏内可直接选择「简体中文」。
+
+【包内容】 langpack/lang/
+  schinese.ini             翻译文本：597 条，与官方 1.5.5 英文版 597 条一一对应，无缺失、无空值
+  languages.txt            语言列表：schinese.ini 已加入（接在官方 13 种之后，索引 13）
+  headers/简体中文_a*.png   7 张区域过场横幅（1/2/3/4/5/7/8 区）
+  titles/…png               标题图：「AM2R 萨姆斯的回归」
+  fonts/
+    04b09.ttf               GUI 大字(16px) + 副屏小字(8px)
+    04b24.ttf               极小字(16px)
+    uni_05_53.ttf           小字/通知/HUD(8px)
+    Acknowledge_TT_BRK.ttf  GUI2(12px)
+    Glasstown_NBP.ttf       日志正文(12px)
+    sizes.ini               各档字号与垂直偏移
+  字体取自开源像素字体 Fusion Pixel Font（缝合像素字体, TakWolf, OFL-1.1）的 8px/12px 简体字形。
+  子集范围 = **本包中文用到的字符 ＋ 官方随包其它 14 种语言用到的全部字符**（并集 2051 个），
+  所以切换成俄语/乌克兰语/德语/日语等**不会再出现口口口**（只换中文字形会导致别的语言满屏方块，
+  这是必须避免的坑）。其中 8px 档的源字体本身不含西里尔/希腊字母，用同族 12px 版缩放补入
+  （同 OFL 许可、像素网格对齐，中文与拉丁字形逐像素不变）。
+
+【为什么必须换字体】
+官方随包的 5 个 TTF 只覆盖拉丁/西里尔/日文汉字集（约 6356 个日文汉字）：
+  · 04b09.ttf / 04b24.ttf（菜单、HUD）：汉字覆盖 0% —— 不换字体满屏方块
+  · 另外三个（GUI2、日志、小字）：覆盖 798/1154 = 69%，缺 356 个常用汉字，且字形是日文写法
+所以「只丢一个 schinese.ini 进去」是没法玩的，这是中文一直卡在 PR 里的真正原因之一。
+
+【Steam Deck 常见问题（与语言包无关，附解法）】
+· 掌机模式全屏时画面错乱 / 上下切成两块 —— **根因已确认，且不用改游戏本体**：
+  AM2R 自带的全屏模式在 Deck 的 gamescope 下就会出错；r/AM2R 上的结论帖（"Steam Deck users: Here's the
+  settings to get the game pixel-perfect without any glitched video on startup and with no need to bind a
+  button to F11"）明确写了：**"全屏=开启 时启动就会画面错乱"**；另一帖的官方回复也是"把 config.ini 里的
+  fullscreen 改回关闭"。
+  解法 = 关掉游戏自带全屏，改由 gamescope 做整数缩放（观感等同全屏、不再错乱）：
+    ① 跑本包的 `bash deck-fullscreen-fix.sh`（自动把 config.ini 改成 Fullscreen=0、Scale=3x，先备份，
+       `--check` 只看、`--restore` 还原）；
+    ② Deck 的 [···] 性能菜单（确认改的是"当前游戏"配置档）：缩放模式=整数，缩放滤镜=像素；
+    ③ 若个别系统版本仍错乱，在 Steam 该条目 属性→启动选项 填：
+       xprop -root -remove GAMESCOPE_FORCE_WINDOWS_FULLSCREEN; %command%
+  想确认是不是语言包造成的：`bash install-cn.sh --uninstall` 后照样复现，即与本包无关。
+· 桌面模式下内置手柄按不了"确认"、按 A 像按了键盘 A：
+  Deck 桌面模式里内置手柄走的是 Lizard 模式（模拟鼠标/键盘），游戏收到的不是手柄按键，而 AM2R 默认
+  键盘绑定里没有 A=确认，所以按不动。这是 Deck 的既有行为。要在桌面模式操作：用触摸屏点按（等于鼠标
+  点击，AM2R 菜单支持）或接键鼠；想用手柄请从**掌机模式**启动（Steam Input 会把内置手柄当作标准手柄）。
+
+【安装（Steam Deck / Flatpak，以及原生 Linux）】
+1) 把本文件夹（含 langpack/ 与 install-cn.sh）解压到任意目录，例如 ~/am2r-cn
+2) 确认 profile 已装好：AM2RLauncher → Play → Install 完成后，profile 目录里应该是
+     Flatpak（Steam Deck）: ~/.var/app/io.github.am2r_community_developers.AM2RLauncher/data/AM2RLauncher/Profiles/Community Updates (Latest)/
+        ├─ runner              （mesa 包装脚本）
+        ├─ .runner-unwrapped   （真正的游戏二进制）
+        ├─ assets/             ← 游戏数据，lang/ 就在 assets/lang/
+        └─ profile.xml
+     原生 Linux（AppImage 版）: ~/.local/share/AM2RLauncher/Profiles/Community Updates (Latest)/AM2R.AppImage
+   两种布局脚本都会自动识别。
+3) 终端执行：  cd ~/am2r-cn && bash install-cn.sh
+   · 若是 Flatpak 布局（Deck）：把语言包注入两处 —— profiles/…/assets/lang/（绝对路径基准）
+     与 profiles/…/lang/（相对路径基准），再给游戏二进制套启动 shim（见下面"平台差异"的工作目录坑）；
+     不打包、不用 appimagetool
+   · 若是 AppImage 布局：备份原 AppImage → 解包 → 注入 → 用 appimagetool 回包（同样会做 profile 根的镜像）
+   两种都会顺手把 config.ini 的 [Screen] Language 设为中文索引。
+4) 启动游戏：选项(Options) → 显示(Display) → 语言(Language) → 简体中文
+   （界面被记住，只需选一次）
+
+【手动应急（脚本识别不到你的布局时；正常情况不需要做）】
+   P="$HOME/.var/app/io.github.am2r_community_developers.AM2RLauncher/data/AM2RLauncher/Profiles/Community Updates (Latest)"
+   mkdir -p "$P/assets/lang" "$P/lang"
+   cp -r langpack/lang/. "$P/assets/lang/"      # 绝对路径基准（languages.txt / schinese.ini 走这里）
+   cp -r langpack/lang/. "$P/lang/"             # 相对路径基准（fonts / headers / titles 走这里）
+   然后启动游戏。注意 languages.txt 的行尾与索引、以及两个大写字体的小写别名，脚本会自动处理，
+   手工做的话容易漏（这也是推荐用脚本的原因）。
+
+脚本参数：
+  --check        只报告现状，不改动任何文件
+  --diag         打印找到的目录结构（排错用；装不上时把它贴给我）
+  --profile "名"  只处理指定 profile（默认处理找到的全部 profile）
+  --uninstall    还原：被覆盖的文件用快照还原、新增的文件删除（回到安装前状态）
+  --no-repack    仅 AppImage 布局：不重新打包，改为运行 <profile>/.am2rcn_work/squashfs-root/AppRun
+  --no-cwd-shim  不装"启动前切工作目录"的 shim（默认装；只影响 <profile>/.runner-unwrapped 这层包装）
+可重复执行（幂等）；Launcher 更新/重装 profile 会覆盖回去，重跑一次脚本即可。
+安装时会在 lang/ 里留两个记账文件（.am2rcn_added / .am2rcn_backup），卸载时会自动清掉。
+
+【可调项】langpack/lang/fonts/sizes.ini（改完重启游戏即生效，不必重新打包）
+各档负责的界面（来自源码）：
+  fontGUI  = 04b09_(large)  -> 主菜单、读档界面存档位标题/时间、物品获得提示、Game Over
+  fontSubScr = 04b09_(small)-> 副屏四个列表的标题（SUIT/BEAM/BOOTS/MISC）
+  fontMenuTiny = 04b24       -> 装备/武器/靴子/杂项 列表里的条目名（POWER SUIT 等）
+  fontMenuSmall = uni_05_53  -> HUD、地图、通知、日志页眉
+  fontGUI2 = Acknowledge_TT_BRK -> 日志记录、日志正文页签、选项/设置标签、菜单标签、通知
+  fontMenuSmall2 = Glasstown_NBP -> 日志正文、过场文本、物品说明
+
+【平台差异（坑，务必注意）】
+Windows：
+  · Launcher 每次重装/更新 profile 都会覆盖 lang/ → 重新把 langpack\lang\ 复制回
+    ...\Profiles\Community Updates (Latest)\lang\ 即可（sizes.ini 也会被覆盖，记得一并复制）
+  · 文件系统大小写不敏感，没有下面 Linux 的大小写问题
+Linux / Flatpak / Steam Deck：
+  · **Deck 上没有 AM2R.AppImage！** Flathub 版是用 NOAPPIMAGE 常量编译的
+    （manifest: -p:DefineConstants="NOAPPIMAGE;NOAUTOUPDATE"），所以 profile 里是
+    runner + .runner-unwrapped + assets/，游戏数据在 assets/lang/。
+  · **最关键的坑：工作目录不等于游戏数据目录。** Launcher 启动游戏时把进程工作目录设成
+    **profile 根目录**（源码 Profile.cs:738/797 `WorkingDirectory = {ProfilesPath}/{profile.Name}`），
+    而游戏数据（含 lang/）在 `<profile>/assets/` 里，于是游戏里的两套路径写法命运不同：
+      - 用 `working_directory + "lang/…"` 的（languages.txt、各语言 ini）→ 正常 ✓（所以中文文本能出来）
+      - 用裸相对 `"lang/…"` 的（fonts/、headers/*.png、titles/、sizes.ini）→ 按进程工作目录解析 → **全部落空** ✗
+    症状就是：中文能显示但**部分汉字空白**（回退到编译进本体的官方字形，那套字形缺 显/选/项 之类）、
+    区域横幅与标题图不生效、sizes.ini 调了没反应（"比例怪怪的"）。
+    → 本包的对策有两层：
+      (1) 语言包**同时注入两处**：`<profile>/assets/lang/`（绝对路径基准）与 `<profile>/lang/`（相对路径基准）；
+      (2) 给 `<profile>/.runner-unwrapped` 套一层 5 行的启动 shim：启动前 `cd` 进 `assets/`，
+          于是不管从 Play 按钮、Steam 还是桌面快捷方式启动，工作目录都等于游戏数据目录，相对路径全部命中。
+          shim 只做"切目录再 exec"，真正的游戏二进制原样保留在旁边的 `.runner-unwrapped.am2rcn-real`，
+          `--uninstall` 会把它还原（可用 `--no-cwd-shim` 跳过这一层）。
+  · **文件名大小写敏感，而且 Launcher 在 Unix 上会把装好的文件名全部转小写**（源码 HelperMethods.LowercaseFolder）。
+    游戏里写死要读的是 lang/fonts/Acknowledge_TT_BRK.ttf 和 Glasstown_NBP.ttf（大写，且有 file_exists 保护），
+    官方 Linux 包里这两个文件是小写 → 官方 Linux 版其实一直没加载这两档字体（静默回退到内置字体）。
+    我们的语言包按源码原样大小写放置，所以 Linux 上这两档也生效（Windows 本来就生效）。
+  · 改完后必须重跑 install-cn.sh；Launcher 更新 profile 后也要重跑（会连 assets/ 一起覆盖）。
+  · 脚本的解包工作区放在 profile 目录内（避免 SteamOS 的 /tmp 是内存盘、解包吃内存）。
+  · config.ini 可能在 ~/.config/AM2R/ 或 Flatpak 的 ~/.var/app/<id>/config/AM2R/，脚本两处都会尝试写语言索引。
+  · 语言文件本身跨平台通用（同一套 lang/），所以安卓汉化版也是同一套资源。
+Android（如果你想自己打 APK）：
+  · 打包器（AM2RLauncher Create APK）会删掉 lang/headers（所以安卓上没有区域过场横幅），
+    但保留 lang/fonts；APK 不做小写化，五档字体都会加载。
+
+【为什么会有"有些字偏大/偏小"】
+官方五个字体大小不一（例如官方 04b24 在 size16 下字形只有 5px 高，而 04b09 在 size16 下是 10px）。
+我们的中文字体（Fusion Pixel）字形更"满格"，且**只在设计尺寸的整数倍下才锐利**：
+  FP8 设计  -> 只能 8 或 16 ；FP12 设计 -> 只能 12 或 24 ；FP10 设计 -> 只能 10 或 20
+非整数倍（如 8 设计渲染到 12）实测会有约 50% 灰边（糊），所以不建议。
+另外 04b09.ttf 这**一个文件要同时服务两档字号**（GUI 大字 + 副屏小字），
+必然只能照顾一头，而"锐利"要求字号 = 设计尺寸的整数倍：
+  04b09.ttf / 04b24.ttf / uni_05_53.ttf 用 8px 设计  → 只有 8、16 锐利
+  Acknowledge_TT_BRK.ttf / Glasstown_NBP.ttf 用 12px 设计 → 只有 12、24 锐利
+所以 14、15 这类中间值都会**略微发虚**（14 是 1.75 倍，15 是 1.875 倍，都不是整数倍）。
+取舍三选一（都不需要改游戏本体）：
+  A. 04b09_(large)=14（当前值，观感尺寸最接近英文原版，略微发虚）
+  B. 04b09_(large)=16（完全锐利，但比英文原版高约 20%）
+  C. 把 Acknowledge_TT_BRK.ttf 复制成 04b09.ttf（换成 12px 设计），再把 sizes.ini 里
+     04b09_(large) 与 04b09_(small) 都设为 12：GUI 大字锐利且大小≈英文原版；
+     代价是副屏四个列表标题（SUIT/BEAM/BOOTS/MISC）会跟着变大（实测不会与条目重叠）。
+     想做 C 就执行：cp lang/fonts/Acknowledge_TT_BRK.ttf lang/fonts/04b09.ttf  然后改 sizes.ini
+
+现用值（= 你手动调过、已确认"感觉还行"的那套）：
+  [Sizes]   04b09_(large)=14  04b09_(small)=8  Acknowledge_TT_BRK=12  uni_05_53=8  04b24=8  Glasstown_NBP=12
+  [Offsets] 04b09_(large)_offset=-3  04b09_(small)_offset=-2  04b24_offset=-2
+  （偏移量是为了补偿我们的字体基线更低：数值越负 = 文字越靠上）
+8px 那一档（uni_05_53）的汉字在 1080p 下偏挤，若觉得难认，可以把它换成 12px：
+    cp langpack/lang/fonts/Acknowledge_TT_BRK.ttf  langpack/lang/fonts/uni_05_53.ttf
+    然后 sizes.ini 里 uni_05_53 改成 12
+（这两个文件是同一套 12px 中文字形子集，可互换；代价是 HUD/地图文字会比英文版略大）
+
+【验证状态】
+· Windows：已在真机 1.5.5 里逐屏走查（标题图、主菜单、游戏模式、HUD、地图、装备/武器列表、
+  日志、设置、存读档），无方块、无缺字、无崩溃。
+· Linux / Steam Deck：安装脚本已用「模拟 Flatpak 布局(runner+assets/)」与「模拟 AppImage 布局」
+  两套假环境做过端到端测试（安装 / 幂等复跑 / --check / --diag / 卸载还原 / 无 appimagetool 回退），
+  全部通过；**真机 Deck 尚待你实测**。
+· 字号与垂直偏移仍可按实际观感微调（只改 sizes.ini，改完重启游戏即生效，不必重装）。
+· 安卓汉化 APK 用的是同一套 lang/ 资源（安卓打包会删掉 lang/headers，所以安卓没有区域过场横幅）。
+· 官方以后新增语言时，重跑脚本即可；schinese.ini 是追加到列表末尾，不会打乱已有语言索引。
+
+【来源与许可】
+· 翻译文本：Hambaka（PR #16；作者栏：Hambaka, lingziyun, 伯翎飞云, 伪装人群, 靈夢的節操,
+  Ghost.J.R, 星之黑卡比）
+· 区域过场横幅：Hambaka（PR #16）
+· 标题图：chloeplz（PR #18，已并入官方仓库 titles/）
+· 字体：Fusion Pixel Font 缝合像素字体（TakWolf）— SIL Open Font License 1.1
+  （本包内 5 个 TTF 是它的衍生子集 → 同样以 OFL 分发，不是 MIT，全文见 lang/fonts/LICENSE-OFL.txt）
+· 脚本（tools/、build/）：MIT 许可（仓库 LICENSE）
+本包只包含翻译文本、字体与图片，不含任何游戏本体文件、不含游戏代码与商标。
+本包不向上游提交任何 PR / issue：上游 AM2RLauncher 仓库的 AGENTS.md 明确表示不希望「自主 agent」参与贡献，
+我们尊重该立场，仅以本仓库（个人发布）形式存在；原文与完整版权说明见仓库 ATTRIBUTION.md。
+工作分工：翻译文本与图片是人类译者的作品（非机器翻译）；字体子集构建、安装/修复脚本、文档由作者定义需求、
+制定验收标准并逐屏实测，由 AI 助手辅助实现。
+
+【重新生成 / 自行构建（仓库 build/ 里有完整可复现的脚本）】
+  pip install -r build/requirements.txt
+  python build/fetch_fonts.py --dir build/src_fonts     # 下载 Fusion Pixel 2026.09.25 源字体并校验 SHA-256
+  python build/build_fonts.py  --ref-langs "已安装 profile 的 lang 目录"   # 重建 5 档字体子集 + sizes.ini
+  python build/verify_pack.py  --ref-langs "同上"        # 发布前自检（必须全绿）
+  python build/make_zip.py     --version 1.0.0          # 重新打包 zip 并生成 SHA256SUMS
+  --ref-langs 是「子集必须覆盖其它语言用字」这条约束的输入，构建时必传（详见 build/README.md 的四条坑）。

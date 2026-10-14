@@ -1,0 +1,17 @@
+# 默认按文本处理，统一以 LF 入库（Windows 检出时也不做 CRLF 转换）
+* text=auto eol=lf
+
+*.sh  text eol=lf
+*.py  text eol=lf
+*.md  text eol=lf
+*.txt text eol=lf
+
+# 语言包数据文件必须字节级原样：
+#   languages.txt 无末行换行、sizes.ini 是 CRLF、schinese.ini 带 UTF-8 BOM，
+#   这些细节是「和官方格式一致、游戏能正常读」的前提，禁止 Git 做任何换行/BOM 转换。
+lang/** -text
+
+# 二进制（明确标记，便于 diff 与 LFS 判断）
+*.ttf binary
+*.png binary
+*.zip binary

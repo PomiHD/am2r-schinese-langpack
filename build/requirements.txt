@@ -1,0 +1,3 @@
+# 构建/校验脚本依赖（Python 3.9+）
+fonttools>=4.50        # 字体子集化、upem 缩放、字体合并
+brotli                 # fonttools 处理 woff/woff2 时需要（可选但建议装）

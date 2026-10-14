@@ -1,0 +1,11 @@
+# 源字体（约 10 MB，由 build/fetch_fonts.py 下载并校验 SHA-256）
+build/src_fonts/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# 临时/半成品
+*.part
+dist/*.part
